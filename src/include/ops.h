@@ -21,12 +21,12 @@ inline Node* linear(Node* W, Node* x, Node* b) {
     out->backward_op.backward_func = [out,W,x,b](const std::vector<double> &dOut) {
         double go = dOut[0];
         for (std::size_t i = 0; i < W->value.size(); i++) {
-            W->grad[i] += go * x->value[i];
+            W->grad_[i] += go * x->value[i];
         }
         for (std::size_t i = 0; i < x->value.size(); i++) {
-            x->grad[i] += go * W->value[i];
+            x->grad_[i] += go * W->value[i];
         }
-        b->grad[0] += go;
+        b->grad_[0] += go;
     };
 
     return out;
@@ -42,7 +42,7 @@ inline Node* mse_loss(Node* pred, double target) {
     out->backward_op.backward_func = [out,pred,target](const std::vector<double> &dOut) {
         double go = dOut[0];
         double diff = pred->value[0] - target;
-        pred->grad[0] += go * diff; 
+        pred->grad_[0] += go * diff; 
     };
 
     return out;

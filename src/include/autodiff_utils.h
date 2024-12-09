@@ -6,7 +6,7 @@
 #include <unordered_set>
 
 inline void backward(Node* loss) {
-    loss->grad[0] = 1.0;
+    loss->grad_[0] = 1.0;
 
     std::stack<Node*> stack;
     stack.push(loss);
@@ -16,7 +16,7 @@ inline void backward(Node* loss) {
         stack.pop();
 
         if (current->backward_op.backward_func) {
-            current->backward_op.backward_func(current->grad);
+            current->backward_op.backward_func(current->grad_);
         }
 
         for (auto* p : current->parents) {

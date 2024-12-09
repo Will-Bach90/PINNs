@@ -4,6 +4,7 @@
 #include "tensor.h"
 #include <vector>
 #include <functional>
+#include <cmath>
 
 inline double tanh_activation(double x) {
     return std::tanh(x);
@@ -38,6 +39,7 @@ private:
     Tensor b2_;
 
     std::function<double(double)> activation_ = tanh_activation;
+
 };
 
 #endif
