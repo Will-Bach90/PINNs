@@ -22,14 +22,9 @@ public:
 
     std::vector<Node*> parents;
 
-    void zeroGrad() {
-        for (auto &g : grad_)  
-        {
-            g = 0.0; 
-        }  
-    }
+    void zeroGrad();
 
-private:
+private: 
     std::size_t size_;
 
 };
