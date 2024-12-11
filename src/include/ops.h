@@ -59,10 +59,17 @@ inline Node* matmul(Node* W, Node* x, std::size_t output_dim, std::size_t input_
 inline Node* add(Node* y, Node* b, std::size_t output_dim) {
     Node* out = new Node(output_dim);
     double sum = 0.0;
-    for(std::size_t i = 0; i < output_dim; i++) {
-        sum += y->value[i] + b->value[i];
+    for (std::size_t i = 0; i < output_dim; i++) {
+        out->value[i] = y->value[i] + b->value[i];
     }
-    out->value[0] = sum;
+    out->parents = {y, b};
+
+    out->backward_op.backward_func = [out, y, b, output_dim](const std::vector<double>& dOut) {
+        for (std::size_t i = 0; i < output_dim; i++) {
+            y->grad[i] += dOut[i];
+            b->grad[i] += dOut[i];
+        }
+    };
     return out;
 }
 
