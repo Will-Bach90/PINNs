@@ -32,6 +32,47 @@ inline Node* linear(Node* W, Node* x, Node* b) {
     return out;
 }
 
+inline Node* matmul(Node* W, Node* x, std::size_t output_dim, std::size_t input_dim) {
+    Node* out = new Node(output_dim);
+    for(std::size_t i = 0; i < output_dim; i++) {
+        double sum = 0.0;
+        for(std::size_t j = 0; j < input_dim; i++) {
+            sum += W->value[i * input_dim + j] * x->value[j];
+        }
+        out->value[i] = sum;
+    }
+
+    out->parents = {W, x};
+    out->backward_op.backward_func = [out, W, x, output_dim, input_dim](const std::vector<double>& dOut) {
+        for(std::size_t i = 0; i < output_dim; i++) {
+            double go = dOut[i];
+            for(std::size_t j = 0; j < input_dim; j++) {
+                W->grad_[i * input_dim + j] += go * x->value[j];
+                x->grad_[j] += go * W->value[i * input_dim + j];
+            }
+        }
+    };
+
+    return out;
+}
+
+inline Node* add(Node* y, Node* b, std::size_t output_dim) {
+    Node* out = new Node(output_dim);
+    double sum = 0.0;
+    for(std::size_t i = 0; i < output_dim; i++) {
+        sum += y->value[i] + b->value[i];
+    }
+    out->value[0] = sum;
+    return out;
+}
+
+Node* linear_layer(Node* W, Node* b, Node* x, std::size_t output_dim, std::size_t input_dim) {
+    Node* y = matmul(W, x, output_dim, input_dim);
+    Node* out = add(y, b, output_dim);
+    return out;
+}
+
+
 inline Node* tanh_op(Node* input) {
     Node* out = new Node(input->value.size());
     for (std::size_t i = 0; i < input->value.size(); i++) {
@@ -108,42 +149,44 @@ inline Node* mse_loss(Node* pred, double target) {
     return out;
 }
 
-// inline Node* mlp_forward(Node* x, std::size_t hidden_dim) {
+
+
+inline Node* mlp_forward(Node* x, std::size_t hidden_dim, std::size_t output_dim, Node* W1, Node* b1, Node* W2, Node* b2) {
     
-//     Node* out1 = new Node(hidden_dim);
-//     for (std::size_t j = 0; j < hidden_dim; j++) {
-//         out1->value[j] = W1.value[j] * x->value[0] + b1.value[j];
-//     }
-//     out1->parents = {&W1, x, &b1};
-//     out1->backward_op.backward_func = [out1, &W1, x, &b1](const std::vector<double> &dOut){
-//         for (std::size_t j = 0; j < out1->value.size(); j++) {
-//             double go = dOut[j];
-//             W1.grad[j] += go * x->value[0];
-//             x->grad[0] += go * W1.value[j];
-//             b1.grad[j] += go;
-//         }
-//     };
+    Node* out1 = new Node(hidden_dim);
+    for (std::size_t j = 0; j < hidden_dim; j++) {
+        out1->value[j] = W1->value[j] * x->value[0] + b1->value[j];
+    }
+    out1->parents = {W1, x, b1};
+    out1->backward_op.backward_func = [out1, W1, x, b1](const std::vector<double> &dOut){
+        for (std::size_t j = 0; j < out1->value.size(); j++) {
+            double go = dOut[j];
+            W1->grad_[j] += go * x->value[0];
+            x->grad_[0] += go * W1->value[j];
+            b1->grad_[j] += go;
+        }
+    };
 
-//     Node* h = relu_op(out1);
-//     Node* out2 = new Node(output_dim);
-//     double sum = b2.value[0];
-//     for (std::size_t j = 0; j < hidden_dim; j++) {
-//         sum += W2.value[j] * h->value[j];
-//     }
-//     out2->value[0] = sum;
+    Node* h = relu_op(out1);
+    Node* out2 = new Node(output_dim);
+    double sum = b2->value[0];
+    for (std::size_t j = 0; j < hidden_dim; j++) {
+        sum += W2->value[j] * h->value[j];
+    }
+    out2->value[0] = sum;
 
-//     out2->parents = {&W2, h, &b2};
-//     out2->backward_op.backward_func = [out2, &W2, h, &b2](const std::vector<double> &dOut){
-//         double go = dOut[0];
-//         for (std::size_t j = 0; j < W2.value.size(); j++) {
-//             W2.grad[j] += go * h->value[j];
-//             h->grad[j] += go * W2.value[j];
-//         }
-//         b2.grad[0] += go;
-//     };
+    out2->parents = {W2, h, b2};
+    out2->backward_op.backward_func = [out2, W2, h, b2](const std::vector<double> &dOut){
+        double go = dOut[0];
+        for (std::size_t j = 0; j < W2->value.size(); j++) {
+            W2->grad_[j] += go * h->value[j];
+            h->grad_[j] += go * W2->value[j];
+        }
+        b2->grad_[0] += go;
+    };
 
-//     return out2;
-// }
+    return out2;
+}
 
 
 #endif

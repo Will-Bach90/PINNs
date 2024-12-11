@@ -15,48 +15,6 @@ Node b1(hidden_dim);
 Node W2(output_dim * hidden_dim);
 Node b2(output_dim);
 
-Node* mlp_forward(Node* x) {
-    Node* out1 = new Node(hidden_dim);
-    for (std::size_t j = 0; j < hidden_dim; j++) {
-        out1->value[j] = W1.value[j] * x->value[0] + b1.value[j];
-    }
-    out1->parents = {&W1, x, &b1};
-    out1->backward_op.backward_func = [out1](const std::vector<double> &dOut){
-        Node* W1ptr = out1->parents[0];
-        Node* xptr = out1->parents[1];
-        Node* b1ptr = out1->parents[2];
-        for (std::size_t j = 0; j < out1->value.size(); j++) {
-            double go = dOut[j];
-            W1ptr->grad_[j] += go * xptr->value[0];
-            xptr->grad_[0] += go * W1ptr->value[j];
-            b1ptr->grad_[j] += go;
-        }
-    };
-
-    Node* h = relu_op(out1);
-
-    Node* out2 = new Node(output_dim);
-    double sum = b2.value[0];
-    for (std::size_t j = 0; j < hidden_dim; j++) {
-        sum += W2.value[j] * h->value[j];
-    }
-    out2->value[0] = sum;
-    out2->parents = {&W2, h, &b2};
-    out2->backward_op.backward_func = [out2](const std::vector<double> &dOut){
-        Node* W2ptr = out2->parents[0];
-        Node* hptr = out2->parents[1];
-        Node* b2ptr = out2->parents[2];
-        double go = dOut[0];
-        for (std::size_t j = 0; j < W2ptr->value.size(); j++) {
-            W2ptr->grad_[j] += go * hptr->value[j];
-            hptr->grad_[j] += go * W2ptr->value[j];
-        }
-        b2ptr->grad_[0] += go;
-    };
-
-    return out2;
-}
-
 int main() {
     {
         std::mt19937 gen(42);
@@ -86,7 +44,7 @@ int main() {
         for (int i = 0; i < (int)xs.size(); i++) {
             Node x_node(1);
             x_node.value[0] = xs[i];
-            Node* pred = mlp_forward(&x_node);
+            Node* pred = mlp_forward(&x_node, hidden_dim, output_dim, &W1, &b1, &W2, &b2);
             Node* loss = mse_loss(pred, ys[i]);
             x_node.zeroGrad();
             pred->zeroGrad();
@@ -113,5 +71,3 @@ int main() {
 
     return 0;
 }
-
-
