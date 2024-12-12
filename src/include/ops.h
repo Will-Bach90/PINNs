@@ -2,7 +2,7 @@
 #define OPS_H
 
 #include "node.h"
-#include <cassert>
+// #include <cassert>
 
 
 inline Node* linear(Node* W, Node* x, Node* b) {
@@ -66,8 +66,8 @@ inline Node* add(Node* y, Node* b, std::size_t output_dim) {
 
     out->backward_op.backward_func = [out, y, b, output_dim](const std::vector<double>& dOut) {
         for (std::size_t i = 0; i < output_dim; i++) {
-            y->grad[i] += dOut[i];
-            b->grad[i] += dOut[i];
+            y->grad_[i] += dOut[i];
+            b->grad_[i] += dOut[i];
         }
     };
     return out;
