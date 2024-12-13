@@ -5,7 +5,7 @@
 // #include <cassert>
 
 
-inline Node* linear(Node* W, Node* x, Node* b) {
+inline Node* linear1(Node* W, Node* x, Node* b) {
     assert(W->value.size() == x->value.size());
     assert(b->value.size() == 1);
 

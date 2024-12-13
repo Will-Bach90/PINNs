@@ -3,6 +3,7 @@
 
 #include "node.h"
 #include "ops.h"
+#include "autodiff_utils.h"
 
 class Linear {
 public:

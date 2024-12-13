@@ -11,5 +11,5 @@ file(GLOB HDR_FILES
 add_library(pinn_lib ${SRC_FILES})
 target_include_directories(pinn_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(pinn src/main.cpp src/node.cpp)
+add_executable(pinn src/main.cpp)
 target_link_libraries(pinn PRIVATE pinn_lib)
