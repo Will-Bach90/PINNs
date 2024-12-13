@@ -80,15 +80,12 @@ int main() {
 
     // Node* out = layer.forward(&x_node);
 
-    // // Expected math:
     // // out[0] = (1*1.0 + 2*2.0) + 0.5 = (1+4)+0.5 = 5.5
     // // out[1] = (3*1.0 + 4*2.0) - 1.0 = (3+8)-1 = 10.0
     // // Check if out->value = {5.5, 10.0}.
     // std::cout << "Output: " << out->value[0] << ", " << out->value[1] << "\n";
 
-    // Suppose an MLP with one layer 1->1 (essentially just linear)
     Linear layer(1,1);
-    // Train to learn y=2x
     std::vector<double> xs = {0,1,2,3};
     std::vector<double> ys = {0,2,4,6};
 
