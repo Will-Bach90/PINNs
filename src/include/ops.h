@@ -2,7 +2,7 @@
 #define OPS_H
 
 #include "node.h"
-// #include <cassert>
+#include <cassert>
 
 
 inline Node* linear1(Node* W, Node* x, Node* b) {

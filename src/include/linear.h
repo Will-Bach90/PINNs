@@ -1,7 +1,7 @@
 #ifndef LINEAR_H
 #define LINEAR_H
 
-#include "node.h"
+// #include "node.h"
 #include "ops.h"
 #include "autodiff_utils.h"
 
