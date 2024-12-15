@@ -1,7 +1,7 @@
 #ifndef LINEAR_H
 #define LINEAR_H
 
-// #include "node.h"
+#include "node.h"
 #include "ops.h"
 #include "autodiff_utils.h"
 
@@ -15,6 +15,11 @@ public:
     Linear(std::size_t in_dim, std::size_t out_dim);
 
     Node* forward(Node* x);
+
+    Node* backward(Node* x);
+
+private:
+    Node *linear_layer(Node* W, Node* b, Node* x, std::size_t output_dim, std::size_t input_dim);
 };
 
 #endif

@@ -2,10 +2,11 @@
 #define OPS_H
 
 #include "node.h"
+#include <iostream>
 #include <cassert>
 
 
-inline Node* linear1(Node* W, Node* x, Node* b) {
+inline Node* linear(Node* W, Node* x, Node* b) {
     assert(W->value.size() == x->value.size());
     assert(b->value.size() == 1);
 
@@ -36,12 +37,11 @@ inline Node* matmul(Node* W, Node* x, std::size_t output_dim, std::size_t input_
     Node* out = new Node(output_dim);
     for(std::size_t i = 0; i < output_dim; i++) {
         double sum = 0.0;
-        for(std::size_t j = 0; j < input_dim; i++) {
+        for(std::size_t j = 0; j < input_dim; j++) {
             sum += W->value[i * input_dim + j] * x->value[j];
         }
         out->value[i] = sum;
     }
-
     out->parents = {W, x};
     out->backward_op.backward_func = [out, W, x, output_dim, input_dim](const std::vector<double>& dOut) {
         for(std::size_t i = 0; i < output_dim; i++) {
@@ -72,13 +72,6 @@ inline Node* add(Node* y, Node* b, std::size_t output_dim) {
     };
     return out;
 }
-
-Node* linear_layer(Node* W, Node* b, Node* x, std::size_t output_dim, std::size_t input_dim) {
-    Node* y = matmul(W, x, output_dim, input_dim);
-    Node* out = add(y, b, output_dim);
-    return out;
-}
-
 
 inline Node* tanh_op(Node* input) {
     Node* out = new Node(input->value.size());
