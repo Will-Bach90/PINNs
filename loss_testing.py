@@ -19,7 +19,7 @@ plt.show()
 test_x = []
 test_true = []
 test_pred = []
-with open("predictions.txt", "r") as f:
+with open("predictions_complex.txt", "r") as f:
     for line in f:
         if line.startswith("#"):
             continue

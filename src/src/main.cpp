@@ -11,7 +11,7 @@
 
 
 int main() {
-    int total_points = 1000;
+    int total_points = 100;
     std::vector<double> xs;
     std::vector<double> ys;
 
@@ -26,7 +26,7 @@ int main() {
         ys.push_back(y_val);
     }
 
-    size_t train_size = 900;
+    size_t train_size = 80;
     size_t test_size = xs.size() - train_size;
 
     std::vector<double> xs_train(xs.begin(), xs.begin() + train_size);
@@ -35,9 +35,9 @@ int main() {
     std::vector<double> ys_test(ys.begin() + train_size, ys.end());
 
     double lr = 0.01;
-    MLP net({1, 20, 1});
+    MLP net({1, 20, 20, 1});
     std::ofstream out("../../loss.txt");
-    for(int epoch = 0; epoch < 1001; epoch++) {
+    for(int epoch = 0; epoch < 2001; epoch++) {
         double total_loss = 0.0;
 
         for(auto &layer : net.layers) {
