@@ -21,12 +21,12 @@ int main() {
     for(int i = 0; i < total_points; i++) {
         double x_val = (double)i / total_points; // x in [0,1)
         double noise = dist_noise(gen);
-        double y_val = 10*std::pow(x_val, 3) - 5*std::pow(x_val, 2) + x_val + noise;
+        double y_val = 3*std::pow(x_val, 4) - 2*std::pow(x_val, 3) - 2*std::pow(x_val, 2) + x_val*2 + noise;
         xs.push_back(x_val);
         ys.push_back(y_val);
     }
 
-    size_t train_size = 1400;
+    size_t train_size = 1800;
     size_t test_size = xs.size() - train_size;
 
     std::vector<double> xs_train(xs.end()-train_size, xs.end());
@@ -34,11 +34,11 @@ int main() {
     std::vector<double> xs_test(xs.begin(), xs.end()-train_size);
     std::vector<double> ys_test(ys.begin(), ys.end()-train_size);
 
-    double lr = 0.0001;
+    double lr = 0.001;
     double weight_decay = 1e-4;
-    MLP net({1, 20, 1});
+    MLP net({1, 10, 1});
     std::ofstream out("../../loss.txt");
-    for(int epoch = 0; epoch < 2001; epoch++) {
+    for(int epoch = 0; epoch < 5001; epoch++) {
         double total_loss = 0.0;
 
         for(auto &layer : net.layers) {
@@ -83,18 +83,18 @@ int main() {
 
     std::ofstream pred_file("../../predictions_complex.txt");
     pred_file << "#x true_y pred_y\n";
-    for (size_t i = 0; i < xs_test.size(); i++) {
+    for (size_t i = 0; i < xs.size(); i++) {
         Node x_node(1);
-        x_node.value[0] = xs_test[i];
+        x_node.value[0] = xs[i];
 
         Node* pred = net.forward(&x_node);
         double predicted_value = pred->value[0];
-        double true_value = ys_test[i];
+        double true_value = ys[i];
 
-        std::cout << "x=" << xs_test[i] << " true=" << true_value 
+        std::cout << "x=" << xs[i] << " true=" << true_value 
                   << " pred=" << predicted_value << "\n";
 
-        pred_file << xs_test[i] << " " << true_value << " " << predicted_value << "\n";
+        pred_file << xs[i] << " " << true_value << " " << predicted_value << "\n";
 
         delete pred->parents[0];
         delete pred;

@@ -11,7 +11,7 @@ Linear::Linear(std::size_t in_dim, std::size_t out_dim)
         w_val = dist(gen);
     }
     for (auto &b_val : b.value) {
-        b_val = dist(gen);
+        b_val = 0;
     }
 }
 
