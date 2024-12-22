@@ -12,6 +12,8 @@ class DenseLayer {
         Tensor biases;
         Tensor inputs;
         Tensor outputs;
+        Tensor weight_gradients;
+        Tensor bias_gradients;
         std::function<double (double) > activation;
         std::function<double(double)> activation_derivative;
 
