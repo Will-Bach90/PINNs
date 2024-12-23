@@ -11,6 +11,31 @@
 #include <random>
 #include <vector>
 
+void train(NeuralNetwork &nn, const std::vector<double> &xs_train, const std::vector<double> &ys_train, size_t epochs, double learning_rate) {
+    std::ofstream out("../../loss.txt");
+    size_t train_size = xs_train.size();
+    for (size_t epoch = 0; epoch < epochs; ++epoch) {
+        double loss = 0.0;
+        for (size_t i = 0; i < train_size; ++i) {
+            Tensor input(1, 1);
+            input.data_[0][0] = xs_train[i];
+
+            Tensor target(1, 1);
+            target.data_[0][0] = ys_train[i];
+
+            Tensor output = nn.forward(input);
+            nn.backward(target, learning_rate);
+
+            loss += std::pow(output.data_[0][0] - target.data_[0][0], 2) / 2.0;
+        }
+
+        if (epoch % 100 == 0) {
+            std::cout << "Epoch " << epoch << " Loss: " << loss / train_size << std::endl;
+            out << epoch << " " << loss/train_size << "\n";
+        }
+    }
+    out.close();
+}
 
 int main() {
     int total_points = 2000;
@@ -36,48 +61,16 @@ int main() {
     std::vector<double> xs_test(xs.begin(), xs.end()-train_size);
     std::vector<double> ys_test(ys.begin(), ys.end()-train_size);
 
+    size_t epochs = 1000;
+    double learning_rate = 0.01;
+
     NeuralNetwork nn(
         {1, 10, 10, 1},
-        {relu, relu, sigmoid}, // Activations for each layer
-        {relu_derivative, relu_derivative, sigmoid_derivative}, // Activation derivatives
-        0.001
-    );
+        {relu, relu, sigmoid},
+        {relu_derivative, relu_derivative, sigmoid_derivative},
+        learning_rate);
 
-    std::ofstream out("../../loss.txt");
-    size_t batch_size = 32;
-    for(int epoch = 0; epoch < 1001; ++epoch) {
-        for(size_t i = 0; i < train_size; i+= batch_size) {
-            size_t end = std::min(i + batch_size, train_size);
-            Tensor inputs(end - i, 1);
-            Tensor targets(end - i, 1);
-
-            for(size_t j = i; j < end; ++j) {
-                inputs.data_[j-i][0] = xs_train[j];
-                targets.data_[j-i][0] = ys_train[j];
-            }
-
-            Tensor outputs = nn.forward(inputs);
-            nn.backward(targets, 0.01);
-        }
-
-        if(epoch % 100 == 0) {
-            double loss = 0.0;
-
-            for(size_t i = 0; i < train_size; ++i) {
-                Tensor input(1, 1);
-                input.data_[0][0] = xs_train[i];
-                Tensor target(1, 1);
-                target.data_[0][0] = ys_train[i];
-
-                Tensor output = nn.forward(input);
-                loss += std::pow(output.data_[0][0]- target.data_[0][0], 2) / 2.0;
-            }
-            std::cout << "Epoch " << epoch << " Loss: " << loss/train_size << std::endl;
-            out << epoch << " " << loss/train_size << "\n";
-        }
-
-    }
-    out.close();
+    train(nn, xs_train, ys_train, epochs, learning_rate);
 
     std::ofstream pred_file("../../predictions_complex.txt");
     pred_file << "#x true_y pred_y\n";

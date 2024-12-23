@@ -1,5 +1,4 @@
 #include "../include/denselayer.h"
-#include "../include/utils.h"
 
 DenseLayer::DenseLayer(size_t input_size, size_t output_size, 
             const std::function<double(double)> &activation_function, 

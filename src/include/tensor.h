@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <functional>
+#include <iostream>
 #include <cstddef>
 #include <cmath>
 #include <random>
@@ -23,8 +24,6 @@ public:
     Tensor operator+(const Tensor &) const;
 
     Tensor apply(const std::function<double (double) > &) const;
-
-    std::size_t size() const { return data_.size(); }
 
 };
 

@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include "tensor.h"
+#include "utils.h"
 
 class DenseLayer {
     public:
