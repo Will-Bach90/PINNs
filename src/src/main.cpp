@@ -53,7 +53,7 @@ int main() {
         ys.push_back(y_val);
     }
 
-    size_t train_size = 1800;
+    size_t train_size = 1000;
     size_t test_size = xs.size() - train_size;
 
     std::vector<double> xs_train(xs.end()-train_size, xs.end());
@@ -66,26 +66,26 @@ int main() {
 
     NeuralNetwork nn(
         {1, 10, 10, 1},
-        {relu, relu, sigmoid},
-        {relu_derivative, relu_derivative, sigmoid_derivative},
+        {sigmoid, sigmoid, relu},
+        {sigmoid_derivative, sigmoid_derivative, relu_derivative},
         learning_rate);
 
-    train(nn, xs_train, ys_train, epochs, learning_rate);
+    train(nn, xs, ys, epochs, learning_rate);
 
     std::ofstream pred_file("../../predictions_complex.txt");
     pred_file << "#x true_y pred_y\n";
-    for (size_t i = 0; i < test_size; ++i) {
+    for (size_t i = 0; i < xs.size(); ++i) {
         Tensor inputs(1, 1);
-        inputs.data_[0][0] = xs_test[i];
+        inputs.data_[0][0] = xs[i];
 
         Tensor outputs = nn.forward(inputs);
         double predicted_value = outputs.data_[0][0];
-        double true_value = ys_test[i];
+        double true_value = ys[i];
 
-        std::cout << "x=" << xs_test[i] << " true=" << true_value 
-                  << " pred=" << predicted_value << "\n";
+        // std::cout << "x=" << xs_test[i] << " true=" << true_value 
+        //           << " pred=" << predicted_value << "\n";
 
-        pred_file << xs_test[i] << " " << true_value << " " << predicted_value << "\n";
+        pred_file << xs[i] << " " << true_value << " " << predicted_value << "\n";
 
     }
 

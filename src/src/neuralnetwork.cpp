@@ -20,7 +20,7 @@ Tensor NeuralNetwork::forward(const Tensor &input) {
     return output;
 }
 
-void NeuralNetwork::backward(const Tensor &target, double lambda) {
+void NeuralNetwork::backward(const Tensor &target, double learning_rate) {
     Tensor gradient = layers.back().outputs;
     for (size_t i = 0; i < gradient.rows(); ++i) {
         for(size_t j = 0; j < gradient.cols(); ++j) {
@@ -29,8 +29,8 @@ void NeuralNetwork::backward(const Tensor &target, double lambda) {
     }
 
     for(auto it = layers.rbegin(); it != layers.rend(); ++it) {
-        gradient = it->backward(gradient, lambda);
-        optimizer.update(it->weights, it->weight_gradients);
-        optimizer.update_biases(it->biases, it->bias_gradients);
+        gradient = it->backward(gradient, learning_rate);
+        // optimizer.update(it->weights, it->weight_gradients);
+        // optimizer.update_biases(it->biases, it->bias_gradients);
     }
 }

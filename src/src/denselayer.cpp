@@ -29,7 +29,7 @@ Tensor DenseLayer::forward(const Tensor &input) {
     return outputs;
 }
 
-Tensor DenseLayer::backward(const Tensor &gradient, double lambda) {
+Tensor DenseLayer::backward(const Tensor &gradient, double learning_rate) {
     Tensor dz = gradient.apply(activation_derivative);
     for(size_t i = 0; i < inputs.rows(); ++i) {
         for(size_t j = 0; j < weights.cols(); ++j) {
@@ -40,14 +40,24 @@ Tensor DenseLayer::backward(const Tensor &gradient, double lambda) {
     }
     for(size_t i = 0; i < biases.rows(); ++i) {
         for(size_t j = 0; j < biases.cols(); ++j) {
-            bias_gradients.data_[i][j] += dz.data_[i][j];
+            bias_gradients.data_[0][j] += dz.data_[i][j];
         }
     }
 
-    double reg_term = l2_regularization(weights, lambda);
-    for(auto &row : weights.data_) {
-        for(auto &w : row) {
-            w -= lambda * reg_term;
+    // double reg_term = l2_regularization(weights, lambda);
+    // for(auto &row : weights.data_) {
+    //     for(auto &w : row) {
+    //         w -= lambda * reg_term;
+    //     }
+    // }
+    for(size_t i = 0; i < weights.rows(); ++i) {
+        for(size_t j = 0; j < weights.cols(); ++j) {
+            weights.data_[i][j] -= learning_rate * weight_gradients.data_[i][j];
+        }
+    }
+    for(size_t i = 0; i < biases.rows(); ++i) {
+        for(size_t j = 0; j < biases.cols(); ++j) {
+            biases.data_[i][j] -= learning_rate * bias_gradients.data_[i][j];
         }
     }
 

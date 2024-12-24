@@ -36,22 +36,22 @@ plt.title('Test Set Predictions vs True (Sine + Noise)')
 plt.legend()
 plt.show()
 
-train_x = []
-train_true = []
-train_pred = []
-with open("training_complex.txt", "r") as f:
-    for line in f:
-        if line.startswith("#"):
-            continue
-        xv, tv, pv = line.split()
-        train_x.append(float(xv))
-        train_true.append(float(tv))
-        train_pred.append(float(pv))
+# train_x = []
+# train_true = []
+# train_pred = []
+# with open("training_complex.txt", "r") as f:
+#     for line in f:
+#         if line.startswith("#"):
+#             continue
+#         xv, tv, pv = line.split()
+#         train_x.append(float(xv))
+#         train_true.append(float(tv))
+#         train_pred.append(float(pv))
 
-plt.scatter(train_x, train_true, color='blue', label='True Values')
-plt.scatter(train_x, train_pred, color='red', label='Predictions')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('Train Set Predictions vs True (Sine + Noise)')
-plt.legend()
-plt.show()
+# plt.scatter(train_x, train_true, color='blue', label='True Values')
+# plt.scatter(train_x, train_pred, color='red', label='Predictions')
+# plt.xlabel('x')
+# plt.ylabel('y')
+# plt.title('Train Set Predictions vs True (Sine + Noise)')
+# plt.legend()
+# plt.show()
