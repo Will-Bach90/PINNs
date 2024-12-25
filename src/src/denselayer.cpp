@@ -30,76 +30,54 @@ Tensor DenseLayer::forward(const Tensor &input) {
 }
 
 Tensor DenseLayer::backward(const Tensor &gradient, double learning_rate) {
-    Tensor dz = gradient.apply(activation_derivative);
-    for(size_t i = 0; i < inputs.rows(); ++i) {
-        for(size_t j = 0; j < weights.cols(); ++j) {
-            for(size_t k = 0; k < inputs.cols(); ++k) {
-                weight_gradients.data_[k][j] += inputs.data_[i][k] * dz.data_[i][j];
+    // Compute dz = gradient * activation_derivative(outputs)
+    Tensor dz(inputs.rows(), weights.cols());
+    for (size_t i = 0; i < dz.rows(); ++i) {
+        for (size_t j = 0; j < dz.cols(); ++j) {
+            dz.data_[i][j] = gradient.data_[i][j] * activation_derivative(outputs.data_[i][j]);
+        }
+    }
+
+    // Compute weight gradients: dweights = inputs^T * dz
+    Tensor dweights(weights.rows(), weights.cols());
+    for (size_t i = 0; i < dweights.rows(); ++i) {
+        for (size_t j = 0; j < dweights.cols(); ++j) {
+            dweights.data_[i][j] = 0.0; // Reset accumulator
+            for (size_t k = 0; k < dz.rows(); ++k) {
+                dweights.data_[i][j] += inputs.data_[k][i] * dz.data_[k][j];
             }
         }
     }
-    for(size_t i = 0; i < biases.rows(); ++i) {
-        for(size_t j = 0; j < biases.cols(); ++j) {
-            bias_gradients.data_[0][j] += dz.data_[i][j];
+
+    // Compute bias gradients: dbiases = sum(dz over rows)
+    Tensor dbiases(1, biases.cols());
+    for (size_t j = 0; j < dbiases.cols(); ++j) {
+        dbiases.data_[0][j] = 0.0; // Reset accumulator
+        for (size_t i = 0; i < dz.rows(); ++i) {
+            dbiases.data_[0][j] += dz.data_[i][j];
         }
     }
 
-    // double reg_term = l2_regularization(weights, lambda);
-    // for(auto &row : weights.data_) {
-    //     for(auto &w : row) {
-    //         w -= lambda * reg_term;
-    //     }
-    // }
-    for(size_t i = 0; i < weights.rows(); ++i) {
-        for(size_t j = 0; j < weights.cols(); ++j) {
-            weights.data_[i][j] -= learning_rate * weight_gradients.data_[i][j];
+    // Update weights and biases
+    for (size_t i = 0; i < weights.rows(); ++i) {
+        for (size_t j = 0; j < weights.cols(); ++j) {
+            weights.data_[i][j] -= learning_rate * dweights.data_[i][j];
         }
     }
-    for(size_t i = 0; i < biases.rows(); ++i) {
-        for(size_t j = 0; j < biases.cols(); ++j) {
-            biases.data_[i][j] -= learning_rate * bias_gradients.data_[i][j];
-        }
+    for (size_t j = 0; j < biases.cols(); ++j) {
+        biases.data_[0][j] -= learning_rate * dbiases.data_[0][j];
     }
 
+    // Compute gradient to pass to previous layer: dinputs = dz * weights^T
     Tensor dinputs(dz.rows(), weights.rows());
-    for(size_t i = 0; i < weights.rows(); ++i) {
-        for(size_t j = 0; j < dz.rows(); ++j) {
-            for(size_t k = 0; k < dz.cols(); ++k) {
-                dinputs.data_[j][i] += dz.data_[j][k] * weights.data_[i][k];
+    for (size_t i = 0; i < dinputs.rows(); ++i) {
+        for (size_t j = 0; j < dinputs.cols(); ++j) {
+            dinputs.data_[i][j] = 0.0; // Reset accumulator
+            for (size_t k = 0; k < dz.cols(); ++k) {
+                dinputs.data_[i][j] += dz.data_[i][k] * weights.data_[j][k];
             }
         }
     }
+
     return dinputs;
-
-    // Tensor dweights(inputs.rows(), weights.cols());
-    // for(size_t i = 0; i < inputs.rows(); ++i) {
-    //     for(size_t j = 0; j < weights.cols(); ++j) {
-    //         for(size_t k = 0; k < inputs.cols(); ++k) {
-    //             dweights.data_[k][j] += inputs.data_[i][k] * dz.data_[i][j];
-    //         }
-    //     }
-    // }
-    // gradient descent
-    // Tensor dbiases(1, biases.cols());
-    // for(size_t i = 0; i < weights.rows(); ++i) {
-    //     for(size_t j = 0; j < weights.cols(); ++j) {
-    //         weights.data_[i][j] -= learning_rate * dweights.data_[i][j];
-    //     }
-    // }
-    // for(size_t i = 0; i < biases.rows(); ++i) {
-    //     for(size_t j = 0; j < biases.cols(); ++j) {
-    //         biases.data_[i][j] -= learning_rate * dbiases.data_[i][j];
-    //     }
-    // }
-
-    // Tensor dinputs(dz.rows(), weights.rows());
-    // for(size_t i = 0; i < weights.rows(); ++i) {
-    //     for(size_t j = 0; j < dz.rows(); ++j) {
-    //         for(size_t k = 0; k < dz.cols(); ++k) {
-    //             dinputs.data_[j][i] += dz.data_[j][k] * weights.data_[i][k];
-    //         }
-    //     }
-    // }
-
-    // return dinputs;
 }
