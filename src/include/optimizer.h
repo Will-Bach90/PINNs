@@ -6,13 +6,11 @@
 class SGD {
 public:
 
-    double learning_rate;
+    SGD();
 
-    SGD(double lr);
+    void update(Tensor &weights, const Tensor &gradients, double learning_rate);
 
-    void update(Tensor &weights, const Tensor &gradients);
-
-    void update_biases(Tensor &biases, const Tensor &gradient);
+    void update_biases(Tensor &biases, const Tensor &gradient, double learning_rate);
 
 };
 

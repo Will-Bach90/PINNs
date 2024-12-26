@@ -2,13 +2,15 @@
 
 DenseLayer::DenseLayer(size_t input_size, size_t output_size, 
             const std::function<double(double)> &activation_function, 
-            const std::function<double(double)> &activation_derivative_function) 
+            const std::function<double(double)> &activation_derivative_function,
+            std::shared_ptr<SGD> opt) 
             : weights(input_size, output_size)
             , biases(1, output_size)
             , activation(activation_function)
             , activation_derivative(activation_derivative_function)
             , weight_gradients(input_size, output_size)
             , bias_gradients(1, output_size)
+            , optimizer(opt)
             {
 
                 for(size_t i = 0; i < weights.rows(); ++i) {
@@ -59,14 +61,16 @@ Tensor DenseLayer::backward(const Tensor &gradient, double learning_rate) {
     }
 
     // Update weights and biases
-    for (size_t i = 0; i < weights.rows(); ++i) {
-        for (size_t j = 0; j < weights.cols(); ++j) {
-            weights.data_[i][j] -= learning_rate * dweights.data_[i][j];
-        }
-    }
-    for (size_t j = 0; j < biases.cols(); ++j) {
-        biases.data_[0][j] -= learning_rate * dbiases.data_[0][j];
-    }
+    optimizer->update(weights, dweights, learning_rate);
+    optimizer->update_biases(biases, dbiases, learning_rate);
+    // for (size_t i = 0; i < weights.rows(); ++i) {
+    //     for (size_t j = 0; j < weights.cols(); ++j) {
+    //         weights.data_[i][j] -= learning_rate * dweights.data_[i][j];
+    //     }
+    // }
+    // for (size_t j = 0; j < biases.cols(); ++j) {
+    //     biases.data_[0][j] -= learning_rate * dbiases.data_[0][j];
+    // }
 
     // Compute gradient to pass to previous layer: dinputs = dz * weights^T
     Tensor dinputs(dz.rows(), weights.rows());
