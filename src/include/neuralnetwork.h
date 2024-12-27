@@ -8,12 +8,12 @@
 class NeuralNetwork {
     public:
         std::vector<DenseLayer> layers;
-        SGD optimizer;
 
         NeuralNetwork(const std::vector<size_t> &layer_sizes, 
                         const std::vector<std::function<double (double)> > &activations,
                         const std::vector<std::function<double (double)> > &activation_derivatives,
-                        double learning_rate
+                        double learning_rate,
+                        std::shared_ptr<SGD> opt
                         );
 
         Tensor forward(const Tensor &input);

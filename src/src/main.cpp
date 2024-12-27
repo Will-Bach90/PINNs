@@ -70,7 +70,7 @@ int main() {
 
     size_t train_size = 300;
     size_t epochs = 10001;
-    double learning_rate = 0.1;
+    double learning_rate = 0.01;
 
     std::vector<double> xs_train(xs_normalized.begin(), xs_normalized.begin() + train_size);
     std::vector<double> ys_train(ys_normalized.begin(), ys_normalized.begin() + train_size);
@@ -78,11 +78,15 @@ int main() {
     std::vector<double> xs_test(xs_normalized.begin() + train_size, xs_normalized.end());
     std::vector<double> ys_test(ys_normalized.begin() + train_size, ys_normalized.end());
 
+    auto optimizer = std::make_shared<SGD>();
+
     NeuralNetwork nn(
         {1, 10, 10, 1},
         {sigmoid, sigmoid, sigmoid},
         {sigmoid_derivative, sigmoid_derivative, sigmoid_derivative},
-        learning_rate);
+        learning_rate,
+        optimizer
+        );
 
     train(nn, xs, ys, epochs, learning_rate);
 

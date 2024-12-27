@@ -3,12 +3,12 @@
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes, 
                 const std::vector<std::function<double (double)> > &activations,
                 const std::vector<std::function<double (double)> > &activation_derivatives,
-                double learning_rate
+                double learning_rate,
+                std::shared_ptr<SGD> opt
                 ) 
-                : optimizer(learning_rate)
                 {
                     for(size_t i = 1; i < layer_sizes.size(); ++i) {
-                        layers.emplace_back(layer_sizes[i-1], layer_sizes[i], activations[i-1], activation_derivatives[i-1]);
+                        layers.emplace_back(layer_sizes[i-1], layer_sizes[i], activations[i-1], activation_derivatives[i-1], opt);
                     }
                 }
 
