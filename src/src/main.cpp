@@ -65,7 +65,7 @@ int main() {
 
     for (size_t i = 0; i < xs.size(); ++i) {
         xs_normalized[i] = (xs[i] - min_x) / (max_x - min_x); // Scale to [0, 1]
-        ys_normalized[i] = (ys[i] - min_y) / (max_y - min_y); // Scale to [0, 1]
+        ys_normalized[i] = (ys[i] - min_y) / (max_y - min_y); 
     }
 
     size_t train_size = 300;
