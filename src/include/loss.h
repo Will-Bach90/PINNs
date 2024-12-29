@@ -1,22 +1,41 @@
 #ifndef LOSS_H
 #define LOSS_H
 
-#include "node.h"
+#include "tensor.h"
+#include "neuralnetwork.h"
 
-inline Node* mse_loss(Node* pred, double target) {
-    Node* out = new Node(1);
-    double diff = pred->value[0] - target;
-    out->value[0] = 0.5 * diff * diff;
+double compute_physics_loss(NeuralNetwork &nn, const std::vector<double> &times, const std::vector<std::vector<double>> &accelerations, double dt) {
+    
+    double physics_loss = 0.0;
 
-    out->parents = {pred};
+    for (size_t i = 0; i < times.size(); ++i) {
+        Tensor input(1, 4); // Inputs: (ax, ay, az, t)
+        input.data_[0][0] = accelerations[i][0]; // ax
+        input.data_[0][1] = accelerations[i][1]; // ay
+        input.data_[0][2] = accelerations[i][2]; // az
+        input.data_[0][3] = times[i]; // t
 
-    out->backward_op.backward_func = [out,pred,target](const std::vector<double> &dOut) {
-        double go = dOut[0];
-        double diff = pred->value[0] - target;
-        pred->grad_[0] += go * diff; 
-    };
+        Tensor output = nn.forward(input);
 
-    return out;
+        // Outputs: [x, y, z, vx, vy, vz]
+        double vx = output.data_[0][3];
+        double vy = output.data_[0][4];
+        double vz = output.data_[0][5];
+
+        double ax = accelerations[i][0];
+        double ay = accelerations[i][1];
+        double az = accelerations[i][2];
+
+        // Approximate dv/dt using IMU accelerations and PINN corrections
+        double dvx_dt = vx - ax;
+        double dvy_dt = vy - ay;
+        double dvz_dt = vz - az;
+
+        physics_loss += std::pow(dvx_dt, 2) + std::pow(dvy_dt, 2) + std::pow(dvz_dt, 2);
+    }
+
+    return physics_loss / times.size();
 }
+
 
 #endif
