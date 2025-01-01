@@ -19,6 +19,10 @@ class NeuralNetwork {
         Tensor forward(const Tensor &input);
 
         void backward(const Tensor &target, double lambda);
+
+        double compute_lagrangian(const Tensor &positions, const Tensor &vel, double mass, double gravity);
+
+        Tensor enforce_lagrangian(const Tensor &positions, const Tensor &vel, const Tensor &acc, double mass, double gravity);
 };
 
 #endif
