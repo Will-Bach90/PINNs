@@ -59,16 +59,16 @@ void evaluate_model(NeuralNetwork &nn, const std::vector<std::vector<double>> &a
 
 int main() {
 
-    size_t points = 600;
+    size_t points = 200;
     double dt = 0.01;
     
     auto [accelerations, positions, times] = simulate_imu_data(points, dt);
 
     size_t epochs = 10000;
-    double learning_rate = 0.001;
+    double learning_rate = 0.01;
     auto optimizer = std::make_shared<SGD>();
     NeuralNetwork nn(
-        {4, 10, 6}, // Inputs: 3 accelerations + 1 time, Outputs: 3 positions + 3 velocities
+        {4, 20, 6}, // Inputs: 3 accelerations + 1 time, Outputs: 3 positions + 3 velocities
         {sigmoid, sigmoid}, // Activation functions
         {sigmoid_derivative, sigmoid_derivative},
         learning_rate,

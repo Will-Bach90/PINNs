@@ -24,7 +24,7 @@ DenseLayer::DenseLayer(size_t input_size, size_t output_size,
                 }    
             }
 
-Tensor DenseLayer::forward(const Tensor &input) {                                   // forward base through layer: 
+Tensor DenseLayer::forward(const Tensor &input) {                                   // forward pass through layer: 
     inputs = input;
     Tensor z = (input * weights) + biases;                                          // z = Wx + b
     outputs = z.apply(activation);                                                  // a = sigmoid(z) (for example)
@@ -46,7 +46,7 @@ Tensor DenseLayer::backward(const Tensor &gradient, double learning_rate) {     
         for (size_t j = 0; j < dweights.cols(); ++j) {
             dweights.data_[i][j] = 0.0; // Reset accumulator
             for (size_t k = 0; k < dz.rows(); ++k) {
-                dweights.data_[i][j] += inputs.data_[k][i] * dz.data_[k][j];                            // dw = dz * a^T
+                dweights.data_[i][j] += inputs.data_[k][i] * dz.data_[k][j];                            // dw = a^T * dz
             }
         }
     }
@@ -63,14 +63,6 @@ Tensor DenseLayer::backward(const Tensor &gradient, double learning_rate) {     
     // Update weights and biases
     optimizer->update(weights, dweights, learning_rate);
     optimizer->update_biases(biases, dbiases, learning_rate);
-    // for (size_t i = 0; i < weights.rows(); ++i) {
-    //     for (size_t j = 0; j < weights.cols(); ++j) {
-    //         weights.data_[i][j] -= learning_rate * dweights.data_[i][j];
-    //     }
-    // }
-    // for (size_t j = 0; j < biases.cols(); ++j) {
-    //     biases.data_[0][j] -= learning_rate * dbiases.data_[0][j];
-    // }
 
     // Compute gradient to pass to previous layer: dinputs = dz * weights^T
     Tensor dinputs(dz.rows(), weights.rows());

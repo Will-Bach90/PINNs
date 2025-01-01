@@ -28,11 +28,6 @@ Tensor Tensor::operator*(const Tensor &other) const {
 
 Tensor Tensor::operator+(const Tensor &other) const {
     if(rows() != other.rows() || cols() != other.cols()) {
-        // std::cout << "Rows: " << rows() << std::endl;
-        // std::cout << "Other rows: " << other.rows() << std::endl;
-
-        // std::cout << "Cols: " << cols() << std::endl;
-        // std::cout << "Other cols: " << other.cols() << std::endl;
         throw std::invalid_argument("Matrix dimensions do not match for addition");
     }
 
