@@ -20,6 +20,20 @@ Tensor NeuralNetwork::forward(const Tensor &input) {
     return output;
 }
 
+Tensor NeuralNetwork::lagrange_forward(const Tensor &input, double mass, double gravity) {
+    Tensor positions = input;
+    Tensor vel(layers[0].weights.rows(), 3);
+    Tensor acc(layers[0].weights.rows(), 3);
+    for(auto &layer : layers) {
+        positions = layer.forward(positions);
+        vel = layer.forward(vel);
+        acc = layer.forward(acc);
+    }
+
+    enforce_lagrangian(positions, vel, acc, mass, gravity);
+    return positions;
+
+
 void NeuralNetwork::backward(const Tensor &target, double learning_rate) {
     Tensor gradient = layers.back().outputs;
     for (size_t i = 0; i < gradient.rows(); ++i) {

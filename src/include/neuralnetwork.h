@@ -17,6 +17,7 @@ class NeuralNetwork {
                         );
 
         Tensor forward(const Tensor &input);
+        Tensor lagrange_forward(const Tensor &input, double mass, double gravity);
 
         void backward(const Tensor &target, double lambda);
 
