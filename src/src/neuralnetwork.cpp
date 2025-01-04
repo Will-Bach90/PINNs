@@ -96,3 +96,16 @@ Tensor NeuralNetwork::enforce_lagrangian(const Tensor &positions, const Tensor &
 
     return lagrangian;
 }
+
+double NeuralNetwork::compute_physics_loss_with_lagrangian(const Tensor &pos, const Tensor &vel, const Tensor &acc, double mass, double gravity) {
+
+    Tensor lagrangian_dev = enforce_lagrangian(pos, vel, acc, mass, gravity);
+
+    double physics_loss = 0.0;
+    for(size_t i = 0; i < lagrangian_dev.rows(); i++) {
+        physics_loss += lagrangian_dev.data_[i][0];
+
+    }
+
+    return physics_loss/lagrangian_dev.rows();
+}

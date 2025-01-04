@@ -24,6 +24,8 @@ class NeuralNetwork {
         double compute_lagrangian(const Tensor &positions, const Tensor &vel, double mass, double gravity);
 
         Tensor enforce_lagrangian(const Tensor &positions, const Tensor &vel, const Tensor &acc, double mass, double gravity);
+
+        double compute_physics_loss_with_lagrangian(const Tensor &pos, const Tensor &vel, const Tensor &acc, double mass, double gravity);
 };
 
 #endif
