@@ -33,7 +33,7 @@ Tensor NeuralNetwork::lagrange_forward(const Tensor &input, double mass, double 
     enforce_lagrangian(positions, vel, acc, mass, gravity);
     return positions;
 
-
+}
 void NeuralNetwork::backward(const Tensor &target, double learning_rate) {
     Tensor gradient = layers.back().outputs;
     for (size_t i = 0; i < gradient.rows(); ++i) {
