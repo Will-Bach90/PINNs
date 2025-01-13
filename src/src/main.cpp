@@ -48,29 +48,38 @@ std::vector<std::vector<double > > load_csv(const std::string &filename) {
     return data;
 }
 
-std::tuple<std::vector<std::vector<double>>, std::vector<std::vector<double>>, std::vector<double>>
-preprocess_data(const std::vector<std::vector<double>> &imu_data,
-                const std::vector<std::vector<double>> &gps_data) {
-    std::vector<std::vector<double>> aligned_accel;
-    std::vector<std::vector<double>> aligned_positions;
+std::tuple<std::vector<std::vector<double> >, std::vector<std::vector<double> >, std::vector<double> >
+preprocess_data(const std::vector<std::vector<double> > &imu_data,
+                const std::vector<std::vector<double> > &gps_data) {
+    std::vector<std::vector<double> > aligned_accel;
+    std::vector<std::vector<double> > aligned_positions;
     std::vector<double> aligned_times;
 
-    size_t imu_idx = 0, gps_idx = 0;
+    size_t gps_idx = 0;
 
-    while (imu_idx < imu_data.size() && gps_idx < gps_data.size()) {
-        double imu_time = imu_data[imu_idx][0];
-        double gps_time = gps_data[gps_idx][0];
+    for (size_t imu_idx = 0; imu_idx < imu_data.size(); ++imu_idx) {
+        double imu_time = imu_data[imu_idx][0]; // IMU timestamp
 
-        if (std::abs(imu_time - gps_time) < 0.01) {
-            aligned_times.push_back(imu_time);
-            aligned_accel.push_back({imu_data[imu_idx][4], imu_data[imu_idx][5], imu_data[imu_idx][6]});
-            aligned_positions.push_back({gps_data[gps_idx][2], gps_data[gps_idx][3], gps_data[gps_idx][4]});
-            ++imu_idx;
+        // Find the closest GPS timestamp
+        while (gps_idx + 1 < gps_data.size() && gps_data[gps_idx + 1][0] <= imu_time) {
             ++gps_idx;
-        } else if (imu_time < gps_time) {
-            ++imu_idx; // IMU ahead, move to next IMU entry
-        } else {
-            ++gps_idx; // GPS ahead, move to next GPS entry
+        }
+
+        if (gps_idx + 1 < gps_data.size()) {
+            double gps_time_prev = gps_data[gps_idx][0];
+            double gps_time_next = gps_data[gps_idx + 1][0];
+
+            // Linear interpolation for GPS positions
+            double alpha = (imu_time - gps_time_prev) / (gps_time_next - gps_time_prev);
+            std::vector<double> interpolated_position(3);
+            for (size_t j = 0; j < 3; ++j) {
+                interpolated_position[j] = gps_data[gps_idx][2 + j] * (1 - alpha) +
+                                           gps_data[gps_idx + 1][2 + j] * alpha;
+            }
+
+            aligned_accel.push_back({imu_data[imu_idx][4], imu_data[imu_idx][5], imu_data[imu_idx][6]}); // Accel_x, Accel_y, Accel_z
+            aligned_positions.push_back(interpolated_position);
+            aligned_times.push_back(imu_time);
         }
     }
 
@@ -131,7 +140,18 @@ int main() {
     aligned_positions = normalize_2d(aligned_positions);
     aligned_times = normalize(aligned_times);
 
-    double learning_rate = 0.01;
+
+    std::vector<std::vector<double> > new_accel; 
+    std::vector<std::vector<double> > new_pos;
+    std::vector<double> new_times;
+
+    for(int i = 0; i < 100; i++) {
+        new_accel.push_back(aligned_accel[i]);
+        new_pos.push_back(aligned_positions[i]);
+        new_times.push_back(aligned_times[i]);
+    }  
+
+    double learning_rate = 0.2;
 
     auto optimizer = std::make_shared<SGD>();
     NeuralNetwork nn(
@@ -142,14 +162,13 @@ int main() {
         optimizer
         );
 
-    size_t epochs = 8000;
-    double dt = 0.01;
+    size_t epochs = 15000;
 
-    train_pinn(nn, aligned_accel, aligned_positions, aligned_times, epochs, learning_rate, dt);
+    train_pinn(nn, new_accel, new_pos, new_times, epochs, learning_rate);
 
     std::ofstream outfile("../../pinn_predictions.csv");
     outfile << "time,x_true,y_true,z_true,x_pred,y_pred,z_pred\n";
-    for (size_t i = 0; i < aligned_times.size(); ++i) {
+    for (size_t i = 0; i < 100; ++i) {
         Tensor input(1, 4);
         input.data_[0][0] = aligned_accel[i][0];
         input.data_[0][1] = aligned_accel[i][1];

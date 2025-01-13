@@ -26,9 +26,9 @@ void train(NeuralNetwork &nn, const std::vector<double> &xs_train, const std::ve
     out.close();
 }
 
-void train_pinn(NeuralNetwork &nn, const std::vector<std::vector<double>> &accelerations,
-                const std::vector<std::vector<double>> &positions, const std::vector<double> &times,
-                size_t epochs, double learning_rate, double dt) {
+void train_pinn(NeuralNetwork &nn, const std::vector<std::vector<double> > &accelerations,
+                const std::vector<std::vector<double> > &positions, const std::vector<double> &times,
+                size_t epochs, double learning_rate) {
     for (size_t epoch = 0; epoch < epochs; ++epoch) {
         double data_loss = 0.0;
         double physics_loss = 0.0;
